@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging 
 import os
 from typing import Optional, AsyncGenerator
 from dotenv import load_dotenv
@@ -9,13 +10,13 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     )
 from sqlalchemy.pool import AsyncAdaptedQueuePool
-
+from database.models import Base
 
 load_dotenv()
 
 db_password = str(os.getenv("DATABASE_PASSWORD"))
 db_name = str(os.getenv("DATABASE_NAME"))
-db_port = str(os.getenv("DATABASE_PORT"))
+db_port = int(str(os.getenv("DATABASE_PORT")))
 db_user = str(os.getenv("DATABASE_USER", "postgres"))
 
 
@@ -26,7 +27,7 @@ class DataBase:
                 database: str = "database",
                 host: str = "127.0.0.1",
                 dialect: str = "postgresql",
-                port: str = "5432",
+                port: int = 5432,
                   ):
         self.user = user
         self.password = password
@@ -38,7 +39,7 @@ class DataBase:
         self.engine: Optional[AsyncEngine] = None
         self.session_factory: Optional[async_sessionmaker[AsyncSession]] = None
     
-    def init_db(self) -> None:
+    async def init_db(self) -> None:
         """initialize the database engine and session factory"""
         self.engine = create_async_engine(
             self.url,
@@ -47,8 +48,15 @@ class DataBase:
             max_overflow=20,
             pool_pre_ping=True,
             pool_recycle=300, 
-            echo=False,
+            echo=True,
         )
+        if not self.engine.dialect.has_schema:
+            try:
+                async with self.engine.begin() as conn:
+                    await conn.run_sync(Base.metadata.create_all)
+                    print("Successfully created schema")
+            except Exception as e:
+                print(f"Error due schema creation {e}")
 
         self.session_factory = async_sessionmaker(
             self.engine,
@@ -65,6 +73,7 @@ class DataBase:
     
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """Yield a database session with the correct schema set"""
+        await self.init_db()
         if not self.session_factory:
             raise RuntimeError("Database session factory is not initialized.")
     
@@ -73,6 +82,7 @@ class DataBase:
                 yield session
             except Exception as e:
                 await session.rollback()
+
                 raise RuntimeError(f"Database session error: {e!r}") from e
  
 
