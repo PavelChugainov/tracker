@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from models import User, UserCreate, AddressCreate, Address
+from database.models import User, UserCreate, AddressCreate, Address
 
 
 async def get_user(user_id: int, session: AsyncSession) -> User | None:
