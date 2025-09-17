@@ -9,22 +9,22 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "user_account"
 
-    id: Mapped = mapped_column(primary_key=True)
-    name: Mapped = mapped_column(String(30))
-    fullname: Mapped[Optional[str]]
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(30))
+    last_name: Mapped[Optional[str]]
 
     addresses: Mapped[List["Address"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
-        return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
+        return f"User(id={self.id!r}, name={self.name!r}, fullname={self.last_name!r})"
     
 
 class Address(Base):
     __tablename__ = "address"
 
-    id: Mapped = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     email_address: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"))
 
@@ -34,8 +34,26 @@ class Address(Base):
         return f"Address(id={self.id!r}, email_address={self.email_address!r})"
 
 
-class Item(BaseModel):
+class UserCreate(BaseModel):
     name: str
-    price: float
-    is_offer: bool | None = None
+    last_name: Optional[str] = None
+    addresses: List["AddressCreate"]
 
+
+
+class AddressCreate(BaseModel):
+    email_address: str
+
+
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    last_name: Optional[str] = None
+    addresses: List["AddressOut"]
+
+  
+
+class AddressOut(BaseModel):
+    id: int
+    email_address: str

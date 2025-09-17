@@ -1,5 +1,6 @@
+from __future__ import annotations
 import os
-import asyncio
+from typing import Optional, AsyncGenerator
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -7,14 +8,16 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
     async_sessionmaker,
     )
+from sqlalchemy.pool import AsyncAdaptedQueuePool
+
 
 load_dotenv()
 
-db_url = os.getenv("DATABASE_URL")
-db_password = os.getenv("DATABASE_PASSWORD")
-db_name = os.getenv("DATABASE_NAME")
+db_password = str(os.getenv("DATABASE_PASSWORD"))
+db_name = str(os.getenv("DATABASE_NAME"))
+db_port = str(os.getenv("DATABASE_PORT"))
+db_user = str(os.getenv("DATABASE_USER", "postgres"))
 
-class 
 
 class DataBase:
     def __init__(self,
@@ -22,30 +25,66 @@ class DataBase:
                 password: str = "postgres",
                 database: str = "database",
                 host: str = "127.0.0.1",
-                type: str = "postgresql",
-                db_name: str = "postgres"
+                dialect: str = "postgresql",
+                port: str = "5432",
                   ):
         self.user = user
         self.password = password
-        self.database = database, 
+        self.database = database
         self.host = host
-        self.type = type
-        self.db_name = db_name
-        self.engine = create_async_engine(
-            url=f"{type}+asyncpg://{self.user}:{self.password}@{self.host}/{self.db_name}",
-            echo=True,
-            )
-        self.async_session = sessionmaker(
-            class_=AsyncSession,
-            expire_on_commit=False,
-        )
-    async def init_model(self, base):
-        async with self.engine.begin() as conn:
-            await conn.run_sync(base.metadata.drop_all)
-            await conn.run_sync(base.metadate.create_all)
+        self.port = port
+        self.dialect = dialect
+        self.url = f"{dialect}+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        self.engine: Optional[AsyncEngine] = None
+        self.session_factory: Optional[async_sessionmaker[AsyncSession]] = None
     
-    #Dependency
-    async def get_session(self) -> AsyncSession:
-        async with self.async_session() as session:
-            yield session
+    def init_db(self) -> None:
+        """initialize the database engine and session factory"""
+        self.engine = create_async_engine(
+            self.url,
+            poolclass=AsyncAdaptedQueuePool,
+            pool_size=10,
+            max_overflow=20,
+            pool_pre_ping=True,
+            pool_recycle=300, 
+            echo=False,
+        )
 
+        self.session_factory = async_sessionmaker(
+            self.engine,
+            expire_on_commit=False,
+            autoflush=False,
+            class_=AsyncSession,
+        )
+
+    async def close(self) -> None:
+        """Dispose of the database engine"""
+
+        if self.engine:
+            await self.engine.dispose()
+    
+    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
+        """Yield a database session with the correct schema set"""
+        if not self.session_factory:
+            raise RuntimeError("Database session factory is not initialized.")
+    
+        async with self.session_factory() as session:
+            try:
+                yield session
+            except Exception as e:
+                await session.rollback()
+                raise RuntimeError(f"Database session error: {e!r}") from e
+ 
+
+
+ # Global instances
+sessionmanager = DataBase(
+    user=db_user,
+    database=db_name,
+    password=db_password,
+    port=db_port,
+    )
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async for session in sessionmanager.get_session():
+        yield session
