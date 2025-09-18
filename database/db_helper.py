@@ -12,6 +12,18 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import AsyncAdaptedQueuePool
 from database.models import Base
 
+
+logging.basicConfig(
+    filename="./logs.log",
+    filemode='a',
+    format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=logging.INFO,
+)   
+
+logger = logging.getLogger('Fastapi logger')
+
+
 load_dotenv()
 
 db_password = str(os.getenv("DATABASE_PASSWORD"))
@@ -50,13 +62,13 @@ class DataBase:
             pool_recycle=300, 
             echo=True,
         )
-        if not self.engine.dialect.has_schema:
-            try:
-                async with self.engine.begin() as conn:
-                    await conn.run_sync(Base.metadata.create_all)
-                    print("Successfully created schema")
-            except Exception as e:
-                print(f"Error due schema creation {e}")
+        try:
+            async with self.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+                logger.info("Succsessfully created all tables")
+        except Exception as e:
+            logger.error(f"Error during schema creation: {e}")
+            raise
 
         self.session_factory = async_sessionmaker(
             self.engine,
@@ -75,6 +87,7 @@ class DataBase:
         """Yield a database session with the correct schema set"""
         await self.init_db()
         if not self.session_factory:
+            logger.info("Database session factory is not initialized.")
             raise RuntimeError("Database session factory is not initialized.")
     
         async with self.session_factory() as session:
@@ -82,8 +95,8 @@ class DataBase:
                 yield session
             except Exception as e:
                 await session.rollback()
-
-                raise RuntimeError(f"Database session error: {e!r}") from e
+                logger.info(f"Database session error: {e}")
+                raise RuntimeError(f"Database session error: {e!r}") 
  
 
 
