@@ -63,13 +63,6 @@ class DataBase:
             pool_recycle=300,
             echo=True,
         )
-        try:
-            async with self.engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
-                logger.info("Succsessfully created all tables")
-        except Exception as e:
-            logger.error(f"Error during schema creation: {e}")
-            raise
 
         self.session_factory = async_sessionmaker(
             self.engine,
@@ -77,6 +70,7 @@ class DataBase:
             autoflush=False,
             class_=AsyncSession,
         )
+        logger.info("Database egine and session factory initialized")
 
     async def close(self) -> None:
         """Dispose of the database engine"""
@@ -86,7 +80,7 @@ class DataBase:
 
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """Yield a database session with the correct schema set"""
-        await self.init_db()
+        # await self.init_db()
         if not self.session_factory:
             logger.info("Database session factory is not initialized.")
             raise RuntimeError("Database session factory is not initialized.")

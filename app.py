@@ -1,7 +1,17 @@
 from fastapi import FastAPI
 from routers.users import router
+from contextlib import asynccontextmanager
+from database.db_helper import sessionmanager
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await sessionmanager.init_db()
+    yield
+    await sessionmanager.close()
+
+
+app = FastAPI(lifespan=lifespan)
+
 
 app.include_router(router)
