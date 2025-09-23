@@ -3,8 +3,10 @@ from pydantic import BaseModel
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class User(Base):
     __tablename__ = "user_account"
@@ -19,7 +21,7 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, fullname={self.last_name!r})"
-    
+
 
 class Address(Base):
     __tablename__ = "address"
@@ -40,10 +42,8 @@ class UserCreate(BaseModel):
     addresses: List["AddressCreate"]
 
 
-
 class AddressCreate(BaseModel):
     email_address: str
-
 
 
 class UserOut(BaseModel):
@@ -52,7 +52,6 @@ class UserOut(BaseModel):
     last_name: Optional[str] = None
     addresses: List["AddressOut"]
 
-  
 
 class AddressOut(BaseModel):
     id: int
