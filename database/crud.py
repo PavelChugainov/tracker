@@ -1,9 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models import User, UserCreate, AddressCreate, Address
+from database.models import User, Address
 from sqlalchemy.orm import selectinload
 
 from database.db_helper import logger
+from database.schemas import AddressCreate, UserCreate
+
 
 async def get_user(user_id: int, session: AsyncSession) -> User | None:
     stmt = select(User).options(selectinload(User.addresses)).where(User.id == user_id)
@@ -12,17 +14,14 @@ async def get_user(user_id: int, session: AsyncSession) -> User | None:
     return user
 
 
-async def create_user(
-        user_data: UserCreate,
-        session: AsyncSession
-        ) -> User | None:
+async def create_user(user_data: UserCreate, session: AsyncSession) -> User | None:
     # Convert Pydantic model to ORM model
     try:
         new_user = User(
             name=user_data.name,
             last_name=user_data.last_name,
         )
-    # Handle address: assume user_data.address is List[AddressModel]
+        # Handle address: assume user_data.address is List[AddressModel]
         for addr_data in user_data.addresses:
             address = Address(email_address=addr_data.email_address)
             new_user.addresses.append(address)
@@ -37,4 +36,3 @@ async def create_user(
         logger.info(f"error in crud {e}")
         await session.rollback()
         return None
-    
