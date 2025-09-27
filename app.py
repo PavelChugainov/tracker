@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from routers.users import router
+from src.routers.users import router
 from contextlib import asynccontextmanager
-from database.db_helper import sessionmanager
+from src.database.db_helper import sessionmanager
 
 
 @asynccontextmanager

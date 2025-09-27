@@ -10,10 +10,16 @@ from alembic import context
 
 sys.path.append("C:\\Users\\user\\Documents\\tracker")
 
-from database.models import Base
-from database.db_helper import sessionmanager
+from src.models.address import Address
+from src.models.camp import Camp
+from src.models.commentary import Commentary
+from src.models.review import Review
+from src.models.user import User
 
-print(sessionmanager.url)
+from src.database.models import Base
+
+from src.database.db_helper import sessionmanager
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

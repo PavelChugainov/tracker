@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
     async_sessionmaker,
 )
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import AsyncAdaptedQueuePool
-from database.models import Base
 
 
 logging.basicConfig(
@@ -30,6 +30,10 @@ db_password = str(os.getenv("DATABASE_PASSWORD"))
 db_name = str(os.getenv("DATABASE_NAME"))
 db_port = int(str(os.getenv("DATABASE_PORT")))
 db_user = str(os.getenv("DATABASE_USER", "postgres"))
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class DataBase:
