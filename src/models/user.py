@@ -1,6 +1,6 @@
 from typing import Optional
 
-from src.database.db_helper import Base
+from src.models.base import Base
 
 
 from sqlalchemy import String

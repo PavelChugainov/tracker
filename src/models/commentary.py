@@ -1,5 +1,4 @@
-from src.database.db_helper import Base
-from src.models.user import User
+from src.models.base import Base
 
 
 from sqlalchemy import DATE, ForeignKey, String
@@ -17,7 +16,8 @@ class Commentary(Base):
     author_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     date: Mapped[datetime] = mapped_column(DATE)
 
-    author: Mapped["User"] = relationship(back_populates="comments")
+    author: Mapped["User"] = relationship(back_populates="commentary")  # type: ignore
+    review: Mapped["Review"] = relationship(back_populates="commentary")  # type: ignore
 
     def __repr__(self) -> str:
         return f"Commentary(id={self.id!r}, text={self.text!r}, date={self.date!r})"
