@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.address import Address
 from sqlalchemy.orm import selectinload
 
-from database.db_helper import logger
+from src.database.db_helper import logger
 from src.schemas.user import UserCreate
 from src.models.user import User
 

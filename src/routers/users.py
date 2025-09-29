@@ -4,8 +4,8 @@ from typing import List
 
 
 from src.models.user import User
-from database.db_helper import get_session
-from database.crud import create_user, get_user
+from src.database.db_helper import get_session
+from src.database.crud import create_user, get_user
 from src.schemas.user import UserCreate, UserOut
 
 

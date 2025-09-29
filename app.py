@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from src.routers.users import router
 from contextlib import asynccontextmanager
 from src.database.db_helper import sessionmanager
-from src.models.base import Base
+from src.models import Base
 
 
 @asynccontextmanager

@@ -8,15 +8,8 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-sys.path.append("C:\\Users\\user\\Documents\\tracker")
 
-from src.models.address import Address
-from src.models.camp import Camp
-from src.models.commentary import Commentary
-from src.models.review import Review
-from src.models.user import User
-
-from src.models import Base
+from app import Base
 
 from src.database.db_helper import sessionmanager
 
