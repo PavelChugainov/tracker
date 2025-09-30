@@ -1,7 +1,7 @@
 from src.models.base import Base
 
 
-from sqlalchemy import Float, Integer
+from sqlalchemy import Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
@@ -12,6 +12,7 @@ class Camp(Base):
     __tablename__ = "camp"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(30))
 
     # Связь "один к одному" с Address
     address: Mapped["Address"] = relationship(back_populates="camp")  # type: ignore

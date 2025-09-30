@@ -11,6 +11,14 @@ from typing import List
 
 
 class User(Base):
+    """
+    id: int
+    name: str
+    last_name: str
+    username: str
+    phone_number: str
+    """
+
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True)

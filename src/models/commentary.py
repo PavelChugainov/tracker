@@ -17,7 +17,7 @@ class Commentary(Base):
     date: Mapped[datetime] = mapped_column(DATE)
 
     author: Mapped["User"] = relationship(back_populates="commentary")  # type: ignore
-    review: Mapped["Review"] = relationship(back_populates="commentary")  # type: ignore
+    review: Mapped["Review"] = relationship(back_populates="commentary", single_parent=True)  # type: ignore
 
     def __repr__(self) -> str:
         return f"Commentary(id={self.id!r}, text={self.text!r}, date={self.date!r})"

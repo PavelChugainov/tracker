@@ -8,6 +8,7 @@ from src.models import Base
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await sessionmanager.init_db()
+
     yield
     await sessionmanager.close()
 

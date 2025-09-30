@@ -13,7 +13,7 @@ class Review(Base):
 
     camp_id: Mapped[int] = mapped_column(ForeignKey("camp.id"))
     camp: Mapped["Camp"] = relationship(back_populates="reviews")  # type: ignore
-    commentary: Mapped["Commentary"] = relationship(back_populates="review")  # type: ignore
+    commentary: Mapped["Commentary"] = relationship("Commentary", back_populates="review")  # type: ignore
 
     def __repr__(self) -> str:
         return f"Review(id={self.id!r}, rating={self.rating!r})"
