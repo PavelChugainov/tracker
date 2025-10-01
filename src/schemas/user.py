@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from typing import List
 
 
+class UserBase(BaseModel):
+    pass
+
+
 class UserCreate(BaseModel):
     name: str
     last_name: Optional[str] = None

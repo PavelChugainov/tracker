@@ -6,13 +6,26 @@ from fastapi.security import OAuth2PasswordBearer
 
 from src.models.user import User
 from src.database.db_helper import get_session
-from src.database.crud import create_user, get_user_by_id
-from src.schemas.user import UserCreate, UserOut
-
+from src.database.crud import create_user, get_user_by_id, get_users
+from src.schemas.user import UserCreate, UserOut, UserBase
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+@router.get("/users", response_model=list[UserOut], status_code=status.HTTP_200_OK)
+async def get_users_endpoint(session: AsyncSession = Depends(get_session)):
+
+    try:
+        users = await get_users(session)
+        return users
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error due getting user's list{e}",
+        )
+    return None
 
 
 @router.get("/items")

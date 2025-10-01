@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.address import Address
@@ -19,6 +20,12 @@ async def get_user_by_id(user_id: int, session: AsyncSession) -> User | None:
     except Exception as e:
         logger.info(f"Error due get user by id in crud {e}")
         return None
+
+
+async def get_users(session: AsyncSession) -> list[User] | None:
+    stmt = select(User).order_by(User.id)
+    res = await session.execute(stmt)
+    return list(res.scalars().all())
 
 
 async def create_user(user_data: UserCreate, session: AsyncSession) -> User | None:
