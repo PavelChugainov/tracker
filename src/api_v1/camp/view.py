@@ -3,10 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 
-from src.models.user import User
+from src.api_v1.camp.crud import get_camp_by_id
+from src.database.models.user import User
 from src.database.db_helper import get_session
-from src.database.crud import get_camp_by_id, create_camp
-from src.schemas.camp import CampOut, CampCreate
+from src.api_v1.camp.crud import create_camp
+from src.api_v1.camp.schemas import CampOut, CampCreate
 
 
 router = APIRouter(prefix="/camps", tags=["camps"])

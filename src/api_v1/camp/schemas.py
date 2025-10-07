@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 from typing import List
-from src.schemas.address import AddressCreate
+from src.api_v1.address.address import AddressCreate
 
 
 class Camp(BaseModel):

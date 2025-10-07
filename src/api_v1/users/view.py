@@ -3,11 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Annotated
 
 
+from src.api_v1.users.crud import get_user_by_id, get_users
 from src.auth.oauth2 import oauth_scheme
-from src.models.user import User
+from src.database.models.user import User
 from src.database.db_helper import get_session
-from src.database.crud import create_user, get_user_by_id, get_users
-from src.schemas.user import UserCreate, User, UserBase
+from src.api_v1.users.crud import create_user
+from src.api_v1.users.schemas import UserCreate, User, UserBase
 from src.auth.oauth2 import get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
