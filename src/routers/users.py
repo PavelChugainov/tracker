@@ -1,20 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Annotated
-from fastapi.security import OAuth2PasswordBearer
 
 
+from src.auth.oauth2 import oauth_scheme
 from src.models.user import User
 from src.database.db_helper import get_session
 from src.database.crud import create_user, get_user_by_id, get_users
-from src.schemas.user import UserCreate, UserOut, UserBase
+from src.schemas.user import UserCreate, User, UserBase
+from src.auth.oauth2 import get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-@router.get("/users", response_model=list[UserOut], status_code=status.HTTP_200_OK)
+@router.get("/users", response_model=list[User], status_code=status.HTTP_200_OK)
 async def get_users_endpoint(session: AsyncSession = Depends(get_session)):
 
     try:
@@ -33,7 +32,7 @@ async def read_items(token: Annotated[str, Depends(oauth_scheme)]):
     return {"token": token}
 
 
-@router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
 async def create_user_endpoint(
     user_data: UserCreate, session: AsyncSession = Depends(get_session)
 ):
@@ -50,7 +49,7 @@ async def create_user_endpoint(
         )
 
 
-@router.get("/", response_model=UserOut, status_code=status.HTTP_200_OK)
+@router.get("/", response_model=User, status_code=status.HTTP_200_OK)
 async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_session)):
     """Get user by id"""
     try:
@@ -61,3 +60,8 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_sessi
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error due getting user by id: {e}",
         )
+
+
+@router.get("/me")
+async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+    return current_user

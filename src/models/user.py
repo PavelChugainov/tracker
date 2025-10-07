@@ -17,6 +17,10 @@ class User(Base):
     last_name: str
     username: str
     phone_number: str
+    email: str
+    password_hash: str
+    is_verified: bool
+
     """
 
     __tablename__ = "user"
@@ -26,6 +30,11 @@ class User(Base):
     last_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     username: Mapped[str] = mapped_column(String(20), unique=True)
     phone_number: Mapped[str | None] = mapped_column(String(20), unique=True)
+    email: Mapped[str] = mapped_column(
+        String(30), unique=True, server_default="lorem ipsum"
+    )
+    password_hash: Mapped[str] = mapped_column(String, unique=False)
+    is_verified: Mapped[bool] = mapped_column(default=True, server_default="True")
 
     # Обратная связь для комментариев
     commentary: Mapped[List["Commentary"]] = relationship(  # type: ignore

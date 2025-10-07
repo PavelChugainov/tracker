@@ -1,25 +1,33 @@
-from typing import Optional
-
-from pydantic import BaseModel
-
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 from typing import List
 
 
 class UserBase(BaseModel):
+    name: str
+    username: str
+    email: EmailStr
+    password: str
+
+
+class UserLoginSchema(BaseModel):
+    model_config = ConfigDict(strict=True)
+
+    username: str
+    password: str
+    email: EmailStr
+    is_verified: bool
+
+
+class UserCreate(UserBase):
     pass
 
 
-class UserCreate(BaseModel):
-    name: str
-    last_name: Optional[str] = None
-    username: str
-    phone_number: Optional[str] = None
+class UserUpdate(UserBase):
+    pass
 
 
-class UserOut(BaseModel):
+class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
-    name: str
-    last_name: Optional[str] = None
-    username: str
-    phone_number: Optional[str] = None
