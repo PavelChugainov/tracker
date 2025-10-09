@@ -1,37 +1,21 @@
-FROM python:3.13-alpine3.20 as base
+FROM python:3.13 AS builder
 
-ENV PYTHONFAULTHANDLER=1 \
-    PYTHONHASHSEED=random \
-    PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY requirements.txt ./
+
+RUN pip install --no-cache-dir --target /deps -r requirements.txt \
+    && pip install --no-cache-dir --target /deps uvicorn
+
+
+
+FROM python:3.13-slim
 
 WORKDIR /app
 
-FROM base as builder
+ENV PYTHONPATH=/deps
 
-ENV PIP_DEFAULT_TIMEOUT=100 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 \
-    POETRY_VERSION=2.1.4
-
-#RUN apk add --no-cache gcc libffi-dev musl-dev postgresql-dev
-RUN pip install "poetry==$POETRY_VERSION"
-
-RUN poetry config virtualenvs.create false
-
-RUN python -m venv /venv
-
-COPY pyproject.toml poetry.lock ./
-RUN poetry export -f requirements.txt | /venv/bin/pip install -r /dev/stdin
-
-RUN . /venv/bin/activate && poetry install --no-root $(test "$YOUR_ENV" == production && echo "--no-dev")
-
+COPY --from=builder /deps /deps
 
 COPY . .
-RUN poetry build && /.venv/bin/pip install dist/*.whl
 
-FROM base as final
-
-RUN apk add --no-cache libffi libpq
-COPY --from=builder /venv /venv
-COPY docker-entrypoint.sh app.py ./
-CMD ["./docker-entrypoint.sh"]
+CMD ["python", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
