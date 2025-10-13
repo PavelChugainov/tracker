@@ -1,5 +1,5 @@
 from fastapi.security import OAuth2PasswordBearer
-from src.schemas.user import User
+from src.api_v1.users.schemas import User
 from fastapi import Depends
 from typing import Annotated
 

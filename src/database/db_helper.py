@@ -13,7 +13,7 @@ from sqlalchemy.pool import AsyncAdaptedQueuePool
 
 
 logging.basicConfig(
-    filename="..//logs//logs.log",
+    filename="/app/logs/logs.log",
     filemode="a",
     format="%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",

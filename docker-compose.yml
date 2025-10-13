@@ -21,6 +21,8 @@ services:
 
   fastapi:
     build: .
+    ports:
+      - "8000:8000"
     container_name: fastapi
     environment:
       - DB_USER=${DB_USER:-postgres}
@@ -28,7 +30,7 @@ services:
       - DB_NAME=${DB_NAME:-work_time}
       - DB_HOST=db
     volumes:
-      - ./excel_files:/app/logs
+      - ./logs:/app/logs
     depends_on:
       db:
         condition: service_healthy
