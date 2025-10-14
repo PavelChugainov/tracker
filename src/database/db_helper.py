@@ -12,8 +12,15 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import AsyncAdaptedQueuePool
 
 
+LOG_DIR = os.getenv(
+    "LOG_DIR", "logs"
+)  # по умолчанию — папка 'logs' рядом с приложением
+LOG_FILE = os.path.join(LOG_DIR, "logs.log")
+
+os.makedirs(LOG_DIR, exist_ok=True)
+
 logging.basicConfig(
-    filename="/app/logs/logs.log",
+    filename=LOG_FILE,
     filemode="a",
     format="%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -37,7 +44,7 @@ class DataBase:
         user: str = "postgres",
         password: str = "postgres",
         database: str = "database",
-        host: str = "127.0.0.1",
+        host: str = "eco_app_db",
         dialect: str = "postgresql",
         port: int = 5432,
     ):
