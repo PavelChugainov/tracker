@@ -4,6 +4,7 @@ from src.api_v1.users.schemas import UserCreate
 
 
 from sqlalchemy import select
+from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -18,6 +19,14 @@ async def get_user_by_id(user_id: int, session: AsyncSession) -> User | None:
         return None
 
 
+async def get_user(session: AsyncSession, user_username: str | None) -> User | None:
+    stmt = select(User).where(User.username == user_username)
+    result: Result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
+    return user
+    # return await session.get(User, user_username)
+
+
 async def get_users(session: AsyncSession) -> list[User] | None:
     stmt = select(User).order_by(User.id)
     res = await session.execute(stmt)
@@ -29,9 +38,8 @@ async def create_user(user_data: UserCreate, session: AsyncSession) -> User | No
     try:
         new_user = User(
             name=user_data.name,
-            last_name=user_data.last_name,
             username=user_data.username,
-            phone_number=user_data.phone_number,
+            email=user_data.email,
         )
         session.add(new_user)
         logger.info("user added")
