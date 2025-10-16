@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from src.api_v1.users.view import router
+from src.auth.views import router as auth_router
 from contextlib import asynccontextmanager
 from src.database.db_helper import sessionmanager
 from src.database.models import Base
@@ -17,3 +18,4 @@ app = FastAPI(lifespan=lifespan)
 
 
 app.include_router(router)
+app.include_router(auth_router)

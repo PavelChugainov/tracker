@@ -4,12 +4,12 @@ from typing import List, Annotated
 
 
 from src.api_v1.users.crud import get_user_by_id, get_users
-from src.auth.oauth2 import oauth_scheme
+from src.api_v1.users.schemas import UserLoginSchema
 from src.database.models.user import User
 from src.database.db_helper import get_session
 from src.api_v1.users.crud import create_user
 from src.api_v1.users.schemas import UserCreate, User, UserBase
-from src.auth.oauth2 import get_current_user
+from src.auth.views import get_current_auth_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -29,7 +29,7 @@ async def get_users_endpoint(session: AsyncSession = Depends(get_session)):
 
 
 @router.get("/items")
-async def read_items(token: Annotated[str, Depends(oauth_scheme)]):
+async def read_items(token: Annotated[str, Depends(UserLoginSchema)]):
     return {"token": token}
 
 
@@ -39,7 +39,7 @@ async def create_user_endpoint(
 ):
     """Create new user with one or several addresses"""
     try:
-        res = await create_user(user_data, session)
+        res = await create_user(user_in=user_data, session=session)
         user = res.__dict__
 
         return user
@@ -64,5 +64,5 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_sessi
 
 
 @router.get("/me")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+async def read_users_me(current_user: Annotated[User, Depends(get_current_auth_user)]):
     return current_user
