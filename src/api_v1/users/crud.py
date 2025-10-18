@@ -71,7 +71,7 @@ async def create_user(session: AsyncSession, user_in: UserCreate) -> User:
     # hash password
     hashed_password = hash_password(user_in.password)
     user_data = user_in.model_dump()
-    user_data["password"] = hashed_password
+    user_data["password_hash"] = hashed_password
     user = User(**user_data)
     session.add(user)
     await session.commit()
