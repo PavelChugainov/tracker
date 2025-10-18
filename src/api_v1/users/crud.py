@@ -2,10 +2,12 @@ from src.database.db_helper import logger
 from src.database.models.user import User
 from src.api_v1.users.schemas import UserCreate
 
+from fastapi import HTTPException, status
 
 from sqlalchemy import select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.auth.utils import hash_password
 
 
 async def get_user_by_id(user_id: int, session: AsyncSession) -> User | None:
@@ -33,7 +35,7 @@ async def get_users(session: AsyncSession) -> list[User] | None:
     return list(res.scalars().all())
 
 
-async def create_user(user_data: UserCreate, session: AsyncSession) -> User | None:
+async def create_user1(user_data: UserCreate, session: AsyncSession) -> User | None:
     # Convert Pydantic model to ORM model
     try:
         new_user = User(
@@ -51,3 +53,27 @@ async def create_user(user_data: UserCreate, session: AsyncSession) -> User | No
         logger.info(f"Error due user creation {e}")
         await session.rollback()
         return None
+
+
+async def create_user(session: AsyncSession, user_in: UserCreate) -> User:
+    # check if user with the same username or email is already exist
+    stmt = select(User).where(
+        (User.email == user_in.email) | (User.username == user_in.username)
+    )
+    result: Result = await session.execute(stmt)
+    user = result.scalars().first()
+
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with this username or email is already exist",
+        )
+    # hash password
+    hashed_password = hash_password(user_in.password)
+    user_data = user_in.model_dump()
+    user_data["password"] = hashed_password
+    user = User(**user_data)
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return user

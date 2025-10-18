@@ -1,7 +1,8 @@
 #!/bin/sh
-
 set -e
 
-. /venv/bin/activate
+echo "Applying database migrations..."
+python -m alembic upgrade head
 
-exec gunicorn --bind 0.0.0.0:5000 --forwarded-allow-ips='*' app:app
+echo "Starting server..."
+exec python -m uvicorn app:app --host 0.0.0.0 --port 8000
