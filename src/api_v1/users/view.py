@@ -8,13 +8,15 @@ from src.api_v1.users.schemas import UserLoginSchema
 from src.database.models.user import User
 from src.database.db_helper import get_session
 from src.api_v1.users.crud import create_user
-from src.api_v1.users.schemas import UserCreate, User, UserBase
+from src.api_v1.users.schemas import UserCreate, UserReadSchema
 from src.auth.views import get_current_auth_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/users", response_model=list[User], status_code=status.HTTP_200_OK)
+@router.get(
+    "/users", response_model=list[UserReadSchema], status_code=status.HTTP_200_OK
+)
 async def get_users_endpoint(session: AsyncSession = Depends(get_session)):
 
     try:
@@ -33,14 +35,13 @@ async def read_items(token: Annotated[str, Depends(UserLoginSchema)]):
     return {"token": token}
 
 
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED)
 async def create_user_endpoint(
     user_data: UserCreate, session: AsyncSession = Depends(get_session)
 ):
     """Create new user with one or several addresses"""
     try:
-        res = await create_user(user_in=user_data, session=session)
-        user = res.__dict__
+        user = await create_user(user_in=user_data, session=session)
 
         return user
     except Exception as e:
@@ -50,7 +51,7 @@ async def create_user_endpoint(
         )
 
 
-@router.get("/", response_model=User, status_code=status.HTTP_200_OK)
+@router.get("/", response_model=UserReadSchema, status_code=status.HTTP_200_OK)
 async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_session)):
     """Get user by id"""
     try:
@@ -64,5 +65,7 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_sessi
 
 
 @router.get("/me")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_auth_user)]):
+async def read_users_me(
+    current_user: Annotated[UserReadSchema, Depends(get_current_auth_user)],
+):
     return current_user

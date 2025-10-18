@@ -1,6 +1,6 @@
 from src.database.db_helper import logger
 from src.database.models.user import User
-from src.api_v1.users.schemas import UserCreate
+from src.api_v1.users.schemas import UserCreate, UserReadSchema
 
 from fastapi import HTTPException, status
 
@@ -35,27 +35,7 @@ async def get_users(session: AsyncSession) -> list[User] | None:
     return list(res.scalars().all())
 
 
-async def create_user1(user_data: UserCreate, session: AsyncSession) -> User | None:
-    # Convert Pydantic model to ORM model
-    try:
-        new_user = User(
-            name=user_data.name,
-            username=user_data.username,
-            email=user_data.email,
-        )
-        session.add(new_user)
-        logger.info("user added")
-        await session.commit()
-        await session.refresh(new_user)
-
-        return await get_user_by_id(new_user.id, session=session)
-    except Exception as e:
-        logger.info(f"Error due user creation {e}")
-        await session.rollback()
-        return None
-
-
-async def create_user(session: AsyncSession, user_in: UserCreate) -> User:
+async def create_user(session: AsyncSession, user_in: UserCreate) -> UserReadSchema:
     # check if user with the same username or email is already exist
     stmt = select(User).where(
         (User.email == user_in.email) | (User.username == user_in.username)
@@ -70,10 +50,13 @@ async def create_user(session: AsyncSession, user_in: UserCreate) -> User:
         )
     # hash password
     hashed_password = hash_password(user_in.password)
-    user_data = user_in.model_dump()
-    user_data["password_hash"] = hashed_password
-    user = User(**user_data)
-    session.add(user)
+    db_user = User(
+        name=user_in.name,
+        username=user_in.username,
+        email=user_in.email,
+        password_hash=hashed_password,
+    )
+    session.add(db_user)
     await session.commit()
-    await session.refresh(user)
-    return user
+    await session.refresh(db_user)
+    return UserReadSchema.model_validate(db_user)
