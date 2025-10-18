@@ -15,7 +15,6 @@ class UserLoginSchema(BaseModel):
 
     username: str
     password: str
-    email: EmailStr
     is_verified: bool
 
 

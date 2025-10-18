@@ -3,7 +3,7 @@ FROM python:3.13 AS builder
 WORKDIR /app
 COPY requirements.txt ./
 
-RUN pip install --no-cache-dir --target /deps -r requirements.txt jwt uvicorn
+RUN pip install --no-cache-dir --target /deps -r requirements.txt PyJWT uvicorn
 
 
 FROM python:3.13-slim
