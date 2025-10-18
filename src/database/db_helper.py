@@ -44,9 +44,11 @@ class DataBase:
         user: str = "postgres",
         password: str = "postgres",
         database: str = "database",
-        host: str = "eco_app_db",
+        host: str = "localhost",
+        # host: str = "eco_app_db",
         dialect: str = "postgresql",
-        port: int = 5432,
+        # port: int = 5432,
+        port: int = 5455,
     ):
         self.user = user
         self.password = password
